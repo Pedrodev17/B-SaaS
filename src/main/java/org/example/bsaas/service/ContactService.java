@@ -31,7 +31,7 @@ public class ContactService {
     public Contact createContact(Contact contact) {
         // Garantir que o OwnerUser está gerenciado (se existir)
         if (contact.getOwnerUser() != null && contact.getOwnerUser().getUserId() != null) {
-            User owner = userRepository.findById(contact.getOwnerUser().getUserId()).orElse(null);
+            User owner = userRepository.findById(contact.getOwnerUser().getUserId().intValue()).orElse(null);
             contact.setOwnerUser(owner);
         }
         return contactRepository.save(contact);
@@ -57,7 +57,7 @@ public class ContactService {
 
             // Atualiza OwnerUser, se fornecido
             if (contactDetails.getOwnerUser() != null && contactDetails.getOwnerUser().getUserId() != null) {
-                User owner = userRepository.findById(contactDetails.getOwnerUser().getUserId()).orElse(null);
+                User owner = userRepository.findById(contactDetails.getOwnerUser().getUserId().intValue()).orElse(null);
                 contact.setOwnerUser(owner);
             }
 

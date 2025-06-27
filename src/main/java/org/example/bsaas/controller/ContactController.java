@@ -37,9 +37,8 @@ public class ContactController {
 
     @PostMapping
     public ResponseEntity<Contact> createContact(@RequestBody Contact contact) {
-        // Se OwnerUser vier com apenas o ID, vamos buscar o User completo
         if (contact.getOwnerUser() != null && contact.getOwnerUser().getUserId() != null) {
-            User owner = userService.getUserById(contact.getOwnerUser().getUserId());
+            User owner = userService.getUserById(contact.getOwnerUser().getUserId().intValue());
             contact.setOwnerUser(owner);
         }
         Contact created = contactService.createContact(contact);
@@ -48,9 +47,8 @@ public class ContactController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Contact> updateContact(@PathVariable Integer id, @RequestBody Contact contactDetails) {
-        // Se OwnerUser vier com apenas o ID, vamos buscar o User completo
         if (contactDetails.getOwnerUser() != null && contactDetails.getOwnerUser().getUserId() != null) {
-            User owner = userService.getUserById(contactDetails.getOwnerUser().getUserId());
+            User owner = userService.getUserById(contactDetails.getOwnerUser().getUserId().intValue());
             contactDetails.setOwnerUser(owner);
         }
         Contact updated = contactService.updateContact(id, contactDetails);

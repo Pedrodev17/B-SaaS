@@ -19,8 +19,15 @@ public class Deal {
     @Column(name = "Description", length = 1000)
     private String description;
 
-    @Column(name = "Value", precision = 15, scale = 2)
+    // Corrigido: nome da coluna para evitar palavra reservada "value"
+    @Column(name = "DealValue", precision = 15, scale = 2)
     private BigDecimal value;
+
+    @Column(name = "Probability", precision = 5, scale = 2)
+    private BigDecimal probability;
+
+    @Column(name = "Currency", length = 10)
+    private String currency;
 
     @Column(name = "Status", length = 50)
     private String status;
@@ -32,23 +39,115 @@ public class Deal {
     @JoinColumn(name = "OwnerUserID", referencedColumnName = "UserID")
     private User ownerUser;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "AssignedUserID", referencedColumnName = "UserID")
+    private User assignedUser;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CurrentStageID", referencedColumnName = "StageID")
+    private Stage currentStage;
+
     @Column(name = "CreatedAt", updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createdAt;
 
     @Column(name = "UpdatedAt", updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private Timestamp updatedAt;
 
-    public long getTitle(Object description) {
-        return title != null ? title.length() : 0;
+    public Deal() {}
+
+    public Integer getDealId() {
+        return dealId;
     }
 
-    public Object getDescription() {
-        return description != null ? description.length() : 0;
+    public void setDealId(Integer dealId) {
+        this.dealId = dealId;
     }
 
-    public Deal getValue() {
-        return new Deal();
+    public String getTitle() {
+        return title;
     }
 
-    // Getters and setters...
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public BigDecimal getValue() {
+        return value;
+    }
+
+    public void setValue(BigDecimal value) {
+        this.value = value;
+    }
+
+    public BigDecimal getProbability() {
+        return probability;
+    }
+
+    public void setProbability(BigDecimal probability) {
+        this.probability = probability;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Timestamp getCloseDate() {
+        return closeDate;
+    }
+
+    public void setCloseDate(Timestamp closeDate) {
+        this.closeDate = closeDate;
+    }
+
+    public User getOwnerUser() {
+        return ownerUser;
+    }
+
+    public void setOwnerUser(User ownerUser) {
+        this.ownerUser = ownerUser;
+    }
+
+    public User getAssignedUser() {
+        return assignedUser;
+    }
+
+    public void setAssignedUser(User assignedUser) {
+        this.assignedUser = assignedUser;
+    }
+
+    public Stage getCurrentStage() {
+        return currentStage;
+    }
+
+    public void setCurrentStage(Stage currentStage) {
+        this.currentStage = currentStage;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
 }

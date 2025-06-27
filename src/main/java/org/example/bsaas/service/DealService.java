@@ -13,7 +13,6 @@ import java.util.Optional;
 public class DealService {
 
     private final DealRepository dealRepository;
-
     private final UserRepository userRepository;
 
     public DealService(DealRepository dealRepository, UserRepository userRepository) {
@@ -30,33 +29,31 @@ public class DealService {
     }
 
     public Deal createDeal(Deal deal) {
-        return getDeal(deal, deal);
+        return saveDealWithOwner(deal, deal);
     }
 
-    public Deal updateDeal(Integer id, Deal dealDetails) throws InterruptedException {
+    public Deal updateDeal(Integer id, Deal dealDetails) {
         Optional<Deal> optionalDeal = dealRepository.findById(id);
         if (optionalDeal.isPresent()) {
             Deal deal = optionalDeal.get();
-            deal.wait(dealDetails.getTitle(dealDetails.getDescription()));
-            deal.getTitle(dealDetails.getDescription());
-            deal.equals(dealDetails.getValue());
+            deal.setTitle(dealDetails.getTitle());
+            deal.setDescription(dealDetails.getDescription());
+            deal.setValue(dealDetails.getValue());
             deal.setStatus(dealDetails.getStatus());
             deal.setCloseDate(dealDetails.getCloseDate());
-
-            return getDeal(dealDetails, deal);
+            return saveDealWithOwner(dealDetails, deal);
         } else {
             return null;
         }
     }
 
-    private Deal getDeal(Deal dealDetails, Deal deal) {
+    private Deal saveDealWithOwner(Deal dealDetails, Deal deal) {
         if (dealDetails.getOwnerUser() != null && dealDetails.getOwnerUser().getUserId() != null) {
             User owner = userRepository.findById(dealDetails.getOwnerUser().getUserId()).orElse(null);
             deal.setOwnerUser(owner);
         } else {
             deal.setOwnerUser(null);
         }
-
         return dealRepository.save(deal);
     }
 

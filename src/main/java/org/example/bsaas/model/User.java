@@ -130,6 +130,19 @@ public class User {
         return updatedAt;
     }
 
+    // Add getName and setName for compatibility with UserService
+    public String getName() {
+        return (firstName != null ? firstName : "") + (lastName != null ? " " + lastName : "");
+    }
+
+    public void setName(String name) {
+        if (name != null) {
+            String[] parts = name.split(" ", 2);
+            this.firstName = parts[0];
+            this.lastName = parts.length > 1 ? parts[1] : "";
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

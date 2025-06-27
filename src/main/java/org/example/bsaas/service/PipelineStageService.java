@@ -30,8 +30,8 @@ public class PipelineStageService {
         Optional<PipelineStage> optionalStage = pipelineStageRepository.findById(id);
         if (optionalStage.isPresent()) {
             PipelineStage stage = optionalStage.get();
-            stage.setName(stageDetails.getName());
-            stage.setOrder(stageDetails.getOrder());
+            stage.setStageName(stageDetails.getStageName());
+            stage.setStageOrder(stageDetails.getStageOrder());
             stage.setDescription(stageDetails.getDescription());
             // Adicione outros campos conforme o seu modelo
             return pipelineStageRepository.save(stage);

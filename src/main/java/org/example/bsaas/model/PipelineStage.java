@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "PipelineStages")
 public class PipelineStage {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "StageID")
@@ -22,7 +21,7 @@ public class PipelineStage {
     private String description;
 
     @Column(name = "IsDefault")
-    private Boolean isDefault; // In SQL, this was BOOLEAN DEFAULT FALSE
+    private Boolean isDefault;
 
     @Column(name = "CreatedAt", updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createdAt;
@@ -30,18 +29,6 @@ public class PipelineStage {
     @Column(name = "UpdatedAt", updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private Timestamp updatedAt;
 
-    // Constructors
-    public PipelineStage() {
-    }
-
-    public PipelineStage(String stageName, Integer stageOrder, String description, Boolean isDefault) {
-        this.stageName = stageName;
-        this.stageOrder = stageOrder;
-        this.description = description;
-        this.isDefault = isDefault;
-    }
-
-    // Getters and Setters
     public Integer getStageId() {
         return stageId;
     }
@@ -86,31 +73,7 @@ public class PipelineStage {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public Timestamp getUpdatedAt() {
         return updatedAt;
-    }
-
-    public void setUpdatedAt(Timestamp updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    // It's good practice to also override equals(), hashCode(), and toString()
-    // For brevity, they are omitted here but should be considered for a full implementation.
-
-    @Override
-    public String toString() {
-        return "PipelineStage{" +
-                "stageId=" + stageId +
-                ", stageName='" + stageName + '\'' +
-                ", stageOrder=" + stageOrder +
-                ", description='" + description + '\'' +
-                ", isDefault=" + isDefault +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
     }
 }
