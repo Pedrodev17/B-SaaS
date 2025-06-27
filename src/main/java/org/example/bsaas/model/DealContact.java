@@ -2,6 +2,8 @@ package org.example.bsaas.model;
 
 import jakarta.persistence.*;
 import java.sql.Timestamp;
+import java.util.Objects;
+
 import org.example.bsaas.model.Deal;
 import org.example.bsaas.model.Contact;
 
@@ -83,6 +85,19 @@ public class DealContact {
     // It's good practice to also override equals() and hashCode()
     // especially if these objects are used in Sets or as keys in Maps.
     // For brevity, they are omitted here.
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        DealContact that = (DealContact) o;
+        return Objects.equals(dealContactId, that.dealContactId) && Objects.equals(deal, that.deal) && Objects.equals(contact, that.contact) && Objects.equals(roleInDeal, that.roleInDeal) && Objects.equals(createdAt, that.createdAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dealContactId, deal, contact, roleInDeal, createdAt);
+    }
 
     @Override
     public String toString() {

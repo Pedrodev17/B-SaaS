@@ -1,13 +1,14 @@
 package org.example.bsaas.controller;
 
-import org.example.bsaas.model.Contact;
-import org.example.bsaas.model.User;
+import org.example.bsaas.dto.ContactRequestDTO;
+import org.example.bsaas.dto.ContactResponseDTO;
 import org.example.bsaas.service.ContactService;
-import org.example.bsaas.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -17,55 +18,36 @@ public class ContactController {
     @Autowired
     private ContactService contactService;
 
-    @Autowired
-    private UserService userService;
-
     @GetMapping
-    public List<Contact> getAllContacts() {
+    public List<ContactResponseDTO> getAllContacts() {
         return contactService.getAllContacts();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Contact> getContactById(@PathVariable Integer id) {
-        Contact contact = contactService.getContactById(id);
-        if (contact != null) {
-            return ResponseEntity.ok(contact);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ContactResponseDTO> getContactById(@PathVariable Integer id) {
+        ContactResponseDTO contact = contactService.getContactById(id);
+        return ResponseEntity.ok(contact);
     }
 
     @PostMapping
-    public ResponseEntity<Contact> createContact(@RequestBody Contact contact) {
-        if (contact.getOwnerUser() != null && contact.getOwnerUser().getUserId() != null) {
-            User owner = userService.getUserById(contact.getOwnerUser().getUserId().intValue());
-            contact.setOwnerUser(owner);
-        }
-        Contact created = contactService.createContact(contact);
-        return ResponseEntity.ok(created);
+    public ResponseEntity<ContactResponseDTO> createContact(@Validated @RequestBody ContactRequestDTO contactRequest) {
+        ContactResponseDTO created = contactService.createContact(contactRequest);
+        return ResponseEntity
+                .created(URI.create("/api/contacts/" + created.getContactId()))
+                .body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Contact> updateContact(@PathVariable Integer id, @RequestBody Contact contactDetails) {
-        if (contactDetails.getOwnerUser() != null && contactDetails.getOwnerUser().getUserId() != null) {
-            User owner = userService.getUserById(contactDetails.getOwnerUser().getUserId().intValue());
-            contactDetails.setOwnerUser(owner);
-        }
-        Contact updated = contactService.updateContact(id, contactDetails);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ContactResponseDTO> updateContact(
+            @PathVariable Integer id,
+            @Validated @RequestBody ContactRequestDTO contactRequest) {
+        ContactResponseDTO updated = contactService.updateContact(id, contactRequest);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContact(@PathVariable Integer id) {
-        boolean deleted = contactService.deleteContact(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        contactService.deleteContact(id);
+        return ResponseEntity.noContent().build();
     }
 }

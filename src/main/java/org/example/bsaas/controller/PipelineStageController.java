@@ -1,11 +1,14 @@
 package org.example.bsaas.controller;
 
-import org.example.bsaas.model.PipelineStage;
+import org.example.bsaas.dto.PipelineStageRequestDTO;
+import org.example.bsaas.dto.PipelineStageResponseDTO;
 import org.example.bsaas.service.PipelineStageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -16,43 +19,33 @@ public class PipelineStageController {
     private PipelineStageService pipelineStageService;
 
     @GetMapping
-    public List<PipelineStage> getAllStages() {
+    public List<PipelineStageResponseDTO> getAllStages() {
         return pipelineStageService.getAllStages();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PipelineStage> getStageById(@PathVariable Integer id) {
-        PipelineStage stage = pipelineStageService.getStageById(id);
-        if (stage != null) {
-            return ResponseEntity.ok(stage);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<PipelineStageResponseDTO> getStageById(@PathVariable Integer id) {
+        PipelineStageResponseDTO dto = pipelineStageService.getStageById(id);
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping
-    public ResponseEntity<PipelineStage> createStage(@RequestBody PipelineStage stage) {
-        PipelineStage created = pipelineStageService.createStage(stage);
-        return ResponseEntity.ok(created);
+    public ResponseEntity<PipelineStageResponseDTO> createStage(
+            @Validated @RequestBody PipelineStageRequestDTO request) {
+        PipelineStageResponseDTO created = pipelineStageService.createStage(request);
+        return ResponseEntity.created(URI.create("/api/pipelinestages/" + created.getId())).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PipelineStage> updateStage(@PathVariable Integer id, @RequestBody PipelineStage stageDetails) {
-        PipelineStage updated = pipelineStageService.updateStage(id, stageDetails);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<PipelineStageResponseDTO> updateStage(
+            @PathVariable Integer id, @Validated @RequestBody PipelineStageRequestDTO request) {
+        PipelineStageResponseDTO updated = pipelineStageService.updateStage(id, request);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStage(@PathVariable Integer id) {
-        boolean deleted = pipelineStageService.deleteStage(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        pipelineStageService.deleteStage(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -82,9 +82,20 @@ public class DealCollaborator {
         this.createdAt = createdAt;
     }
 
-    // It's good practice to also override equals() and hashCode()
-    // especially if these objects are used in Sets or as keys in Maps.
-    // For brevity, they are omitted here.
+  @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DealCollaborator that = (DealCollaborator) o;
+        return java.util.Objects.equals(dealCollaboratorId, that.dealCollaboratorId) &&
+               java.util.Objects.equals(deal, that.deal) &&
+               java.util.Objects.equals(user, that.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(dealCollaboratorId, deal, user);
+    }
 
     @Override
     public String toString() {

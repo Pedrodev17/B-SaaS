@@ -19,7 +19,6 @@ public class Deal {
     @Column(name = "Description", length = 1000)
     private String description;
 
-    // Corrigido: nome da coluna para evitar palavra reservada "value"
     @Column(name = "DealValue", precision = 15, scale = 2)
     private BigDecimal value;
 
@@ -45,7 +44,7 @@ public class Deal {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CurrentStageID", referencedColumnName = "StageID")
-    private Stage currentStage;
+    private PipelineStage currentStage; // <--- Consistência no nome da entidade
 
     @Column(name = "CreatedAt", updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createdAt;
@@ -55,99 +54,49 @@ public class Deal {
 
     public Deal() {}
 
-    public Integer getDealId() {
-        return dealId;
-    }
-
-    public void setDealId(Integer dealId) {
-        this.dealId = dealId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
+    public Deal(String title, String description, BigDecimal value, BigDecimal probability, String currency, String status,
+                Timestamp closeDate, User ownerUser, User assignedUser, PipelineStage currentStage) {
         this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
-    }
-
-    public BigDecimal getValue() {
-        return value;
-    }
-
-    public void setValue(BigDecimal value) {
         this.value = value;
-    }
-
-    public BigDecimal getProbability() {
-        return probability;
-    }
-
-    public void setProbability(BigDecimal probability) {
         this.probability = probability;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
         this.currency = currency;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
         this.status = status;
-    }
-
-    public Timestamp getCloseDate() {
-        return closeDate;
-    }
-
-    public void setCloseDate(Timestamp closeDate) {
         this.closeDate = closeDate;
-    }
-
-    public User getOwnerUser() {
-        return ownerUser;
-    }
-
-    public void setOwnerUser(User ownerUser) {
         this.ownerUser = ownerUser;
-    }
-
-    public User getAssignedUser() {
-        return assignedUser;
-    }
-
-    public void setAssignedUser(User assignedUser) {
         this.assignedUser = assignedUser;
-    }
-
-    public Stage getCurrentStage() {
-        return currentStage;
-    }
-
-    public void setCurrentStage(Stage currentStage) {
         this.currentStage = currentStage;
     }
 
-    public Timestamp getCreatedAt() {
-        return createdAt;
+    // Getters e setters omitidos para brevidade — use os que já possui!
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Deal deal)) return false;
+        return dealId != null && dealId.equals(deal.dealId);
     }
 
-    public Timestamp getUpdatedAt() {
-        return updatedAt;
+    @Override
+    public int hashCode() {
+        return dealId != null ? dealId.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Deal{" +
+                "dealId=" + dealId +
+                ", title='" + title + '\'' +
+                ", value=" + value +
+                ", probability=" + probability +
+                ", currency='" + currency + '\'' +
+                ", status='" + status + '\'' +
+                ", closeDate=" + closeDate +
+                ", ownerUser=" + (ownerUser != null ? ownerUser.getUserId() : null) +
+                ", assignedUser=" + (assignedUser != null ? assignedUser.getUserId() : null) +
+                ", currentStage=" + (currentStage != null ? currentStage.getStageId() : null) +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }

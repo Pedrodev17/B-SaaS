@@ -6,9 +6,8 @@ import org.example.bsaas.repository.ContactRepository;
 import org.example.bsaas.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ContactService {
@@ -24,55 +23,55 @@ public class ContactService {
     }
 
     public Contact getContactById(Integer id) {
-        Optional<Contact> contact = contactRepository.findById(id);
-        return contact.orElse(null);
+        return contactRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Contato não encontrado com id: " + id));
     }
 
+    @Transactional
     public Contact createContact(Contact contact) {
-        // Garantir que o OwnerUser está gerenciado (se existir)
-        if (contact.getOwnerUser() != null && contact.getOwnerUser().getUserId() != null) {
-            User owner = userRepository.findById(contact.getOwnerUser().getUserId().intValue()).orElse(null);
-            contact.setOwnerUser(owner);
-        }
+        setAndValidateOwner(contact);
         return contactRepository.save(contact);
     }
 
+    @Transactional
     public Contact updateContact(Integer id, Contact contactDetails) {
-        Optional<Contact> optionalContact = contactRepository.findById(id);
-        if (optionalContact.isPresent()) {
-            Contact contact = optionalContact.get();
-            contact.setFirstName(contactDetails.getFirstName());
-            contact.setLastName(contactDetails.getLastName());
-            contact.setEmail(contactDetails.getEmail());
-            contact.setPhoneNumber(contactDetails.getPhoneNumber());
-            contact.setCompanyName(contactDetails.getCompanyName());
-            contact.setJobTitle(contactDetails.getJobTitle());
-            contact.setAddressStreet(contactDetails.getAddressStreet());
-            contact.setAddressCity(contactDetails.getAddressCity());
-            contact.setAddressState(contactDetails.getAddressState());
-            contact.setAddressZipCode(contactDetails.getAddressZipCode());
-            contact.setAddressCountry(contactDetails.getAddressCountry());
-            contact.setLeadSource(contactDetails.getLeadSource());
-            contact.setNotes(contactDetails.getNotes());
+        Contact contact = contactRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Contato não encontrado com id: " + id));
 
-            // Atualiza OwnerUser, se fornecido
-            if (contactDetails.getOwnerUser() != null && contactDetails.getOwnerUser().getUserId() != null) {
-                User owner = userRepository.findById(contactDetails.getOwnerUser().getUserId().intValue()).orElse(null);
-                contact.setOwnerUser(owner);
-            }
+        updateContactFields(contact, contactDetails);
+        setAndValidateOwner(contactDetails);
+        contact.setOwnerUser(contactDetails.getOwnerUser());
+        return contactRepository.save(contact);
+    }
 
-            return contactRepository.save(contact);
-        } else {
-            return null;
+    public void deleteContact(Integer id) {
+        if (!contactRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Contato não encontrado com id: " + id);
+        }
+        contactRepository.deleteById(id);
+    }
+
+    private void setAndValidateOwner(Contact contact) {
+        if (contact.getOwnerUser() != null && contact.getOwnerUser().getUserId() != null) {
+            User owner = userRepository.findById(contact.getOwnerUser().getUserId().intValue())
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário proprietário não encontrado com id: " + contact.getOwnerUser().getUserId()));
+            contact.setOwnerUser(owner);
         }
     }
 
-    public boolean deleteContact(Integer id) {
-        if (contactRepository.existsById(id)) {
-            contactRepository.deleteById(id);
-            return true;
-        } else {
-            return false;
-        }
+    private void updateContactFields(Contact contact, Contact details) {
+        contact.setFirstName(details.getFirstName());
+        contact.setLastName(details.getLastName());
+        contact.setEmail(details.getEmail());
+        contact.setPhoneNumber(details.getPhoneNumber());
+        contact.setCompanyName(details.getCompanyName());
+        contact.setJobTitle(details.getJobTitle());
+        contact.setAddressStreet(details.getAddressStreet());
+        contact.setAddressCity(details.getAddressCity());
+        contact.setAddressState(details.getAddressState());
+        contact.setAddressZipCode(details.getAddressZipCode());
+        contact.setAddressCountry(details.getAddressCountry());
+        contact.setLeadSource(details.getLeadSource());
+        contact.setNotes(details.getNotes());
     }
 }

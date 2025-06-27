@@ -2,6 +2,7 @@ package org.example.bsaas.model;
 
 import jakarta.persistence.*;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 @Entity
 @Table(name = "PipelineStages")
@@ -75,5 +76,17 @@ public class PipelineStage {
 
     public Timestamp getUpdatedAt() {
         return updatedAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        PipelineStage that = (PipelineStage) o;
+        return Objects.equals(stageId, that.stageId) && Objects.equals(stageName, that.stageName) && Objects.equals(stageOrder, that.stageOrder) && Objects.equals(description, that.description) && Objects.equals(isDefault, that.isDefault) && Objects.equals(createdAt, that.createdAt) && Objects.equals(updatedAt, that.updatedAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(stageId, stageName, stageOrder, description, isDefault, createdAt, updatedAt);
     }
 }

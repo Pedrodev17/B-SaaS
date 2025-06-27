@@ -1,11 +1,14 @@
 package org.example.bsaas.controller;
 
-import org.example.bsaas.model.DealCollaborator;
+import org.example.bsaas.dto.DealCollaboratorRequestDTO;
+import org.example.bsaas.dto.DealCollaboratorResponseDTO;
 import org.example.bsaas.service.DealCollaboratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -16,43 +19,33 @@ public class DealCollaboratorController {
     private DealCollaboratorService dealCollaboratorService;
 
     @GetMapping
-    public List<DealCollaborator> getAllDealCollaborators() {
+    public List<DealCollaboratorResponseDTO> getAllDealCollaborators() {
         return dealCollaboratorService.getAllDealCollaborators();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DealCollaborator> getDealCollaboratorById(@PathVariable Integer id) {
-        DealCollaborator dealCollaborator = dealCollaboratorService.getDealCollaboratorById(id);
-        if (dealCollaborator != null) {
-            return ResponseEntity.ok(dealCollaborator);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<DealCollaboratorResponseDTO> getDealCollaboratorById(@PathVariable Integer id) {
+        DealCollaboratorResponseDTO dto = dealCollaboratorService.getDealCollaboratorById(id);
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping
-    public ResponseEntity<DealCollaborator> createDealCollaborator(@RequestBody DealCollaborator dealCollaborator) {
-        DealCollaborator created = dealCollaboratorService.createDealCollaborator(dealCollaborator);
-        return ResponseEntity.ok(created);
+    public ResponseEntity<DealCollaboratorResponseDTO> createDealCollaborator(
+            @Validated @RequestBody DealCollaboratorRequestDTO request) {
+        DealCollaboratorResponseDTO created = dealCollaboratorService.createDealCollaborator(request);
+        return ResponseEntity.created(URI.create("/api/dealcollaborators/" + created.getId())).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DealCollaborator> updateDealCollaborator(@PathVariable Integer id, @RequestBody DealCollaborator dealCollaboratorDetails) {
-        DealCollaborator updated = dealCollaboratorService.updateDealCollaborator(id, dealCollaboratorDetails);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<DealCollaboratorResponseDTO> updateDealCollaborator(
+            @PathVariable Integer id, @Validated @RequestBody DealCollaboratorRequestDTO request) {
+        DealCollaboratorResponseDTO updated = dealCollaboratorService.updateDealCollaborator(id, request);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDealCollaborator(@PathVariable Integer id) {
-        boolean deleted = dealCollaboratorService.deleteDealCollaborator(id);
-        if (deleted) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        dealCollaboratorService.deleteDealCollaborator(id);
+        return ResponseEntity.noContent().build();
     }
 }
