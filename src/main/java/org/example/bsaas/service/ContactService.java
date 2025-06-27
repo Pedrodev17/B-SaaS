@@ -1,5 +1,6 @@
 package org.example.bsaas.service;
 
+import org.example.bsaas.exception.ResourceNotFoundException;
 import org.example.bsaas.model.Contact;
 import org.example.bsaas.model.User;
 import org.example.bsaas.repository.ContactRepository;
@@ -41,9 +42,11 @@ public class ContactService {
         updateContactFields(contact, contactDetails);
         setAndValidateOwner(contactDetails);
         contact.setOwnerUser(contactDetails.getOwnerUser());
+
         return contactRepository.save(contact);
     }
 
+    @Transactional
     public void deleteContact(Integer id) {
         if (!contactRepository.existsById(id)) {
             throw new ResourceNotFoundException("Contato não encontrado com id: " + id);
