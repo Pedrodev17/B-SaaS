@@ -1,5 +1,7 @@
 package org.example.bsaas.service;
 
+import org.example.bsaas.dto.UserRequestDTO;
+import org.example.bsaas.dto.UserResponseDTO;
 import org.example.bsaas.exception.ResourceNotFoundException;
 import org.example.bsaas.model.User;
 import org.example.bsaas.repository.UserRepository;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Serviço responsável pelas operações relacionadas à entidade User.
@@ -21,53 +24,70 @@ public class UserService {
     }
 
     /**
-     * Retorna todos os usuários cadastrados.
+     * Retorna todos os usuários cadastrados como DTOs.
      */
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Busca um usuário pelo id.
-     * @throws ResourceNotFoundException se não existir
+     * Busca um usuário pelo id e retorna como DTO.
      */
-    public User getUserById(Integer id) {
-        return userRepository.findById(id)
+    public UserResponseDTO getUserById(Integer id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+        return UserMapper.toDTO(user);
     }
 
     /**
-     * Cria um novo usuário após validar campos obrigatórios.
+     * Cria um novo usuário a partir de um DTO.
      */
     @Transactional
-    public User createUser(User user) {
+    public UserResponseDTO createUser(UserRequestDTO request) {
+        User user = UserMapper.toEntity(request);
         validarCamposObrigatorios(user);
-        return userRepository.save(user);
+        user = userRepository.save(user);
+        return UserMapper.toDTO(user);
     }
 
     /**
-     * Atualiza um usuário existente.
-     * @throws ResourceNotFoundException se não existir
+     * Atualiza um usuário existente a partir de um DTO.
      */
     @Transactional
-    public User updateUser(Integer id, User userDetails) {
+    public UserResponseDTO updateUser(Integer id, UserRequestDTO request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
         // Atualiza apenas campos não nulos (atualização parcial)
-        if (userDetails.getName() != null) {
-            user.setName(userDetails.getName());
+        if (request.getUsername() != null) {
+            user.setUsername(request.getUsername());
         }
-        if (userDetails.getEmail() != null) {
-            user.setEmail(userDetails.getEmail());
+        if (request.getEmail() != null) {
+            user.setEmail(request.getEmail());
         }
-        // Adicione outros campos conforme necessário
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+        if (request.getRole() != null) {
+            user.setRole(request.getRole());
+        }
+        if (request.getIsActive() != null) {
+            user.setIsActive(request.getIsActive());
+        }
+        if (request.getPassword() != null) {
+            user.setPasswordHash(request.getPassword());
+        }
         validarCamposObrigatorios(user);
-        return userRepository.save(user);
+        user = userRepository.save(user);
+        return UserMapper.toDTO(user);
     }
 
     /**
      * Remove um usuário por id.
-     * @throws ResourceNotFoundException se não existir
      */
     @Transactional
     public void deleteUser(Integer id) {
@@ -81,8 +101,8 @@ public class UserService {
      * Valida campos obrigatórios do usuário.
      */
     private void validarCamposObrigatorios(User user) {
-        if (user.getName() == null || user.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Nome é obrigatório");
+        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
+            throw new IllegalArgumentException("Username é obrigatório");
         }
         if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
             throw new IllegalArgumentException("E-mail é obrigatório");

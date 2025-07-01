@@ -1,5 +1,7 @@
 package org.example.bsaas.service;
 
+import org.example.bsaas.dto.ContactRequestDTO;
+import org.example.bsaas.dto.ContactResponseDTO;
 import org.example.bsaas.exception.ResourceNotFoundException;
 import org.example.bsaas.model.Contact;
 import org.example.bsaas.model.User;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ContactService {
@@ -19,31 +22,56 @@ public class ContactService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<Contact> getAllContacts() {
-        return contactRepository.findAll();
+    // Retorna lista de DTOs
+    public List<ContactResponseDTO> getAllContacts() {
+        return contactRepository.findAll()
+                .stream()
+                .map(ContactMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public Contact getContactById(Integer id) {
-        return contactRepository.findById(id)
+    // Retorna DTO
+    public ContactResponseDTO getContactById(Integer id) {
+        Contact contact = contactRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contato não encontrado com id: " + id));
+        return ContactMapper.toDTO(contact);
     }
 
+    // Cria a partir do DTO
     @Transactional
-    public Contact createContact(Contact contact) {
-        setAndValidateOwner(contact);
-        return contactRepository.save(contact);
+    public ContactResponseDTO createContact(ContactRequestDTO contactRequest) {
+        // Busca o usuário dono
+        User owner = userRepository.findById(contactRequest.getOwnerUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário proprietário não encontrado com id: " + contactRequest.getOwnerUserId()));
+        Contact contact = ContactMapper.toEntity(contactRequest, owner);
+        Contact savedContact = contactRepository.save(contact);
+        return ContactMapper.toDTO(savedContact);
     }
 
+    // Atualiza a partir do DTO
     @Transactional
-    public Contact updateContact(Integer id, Contact contactDetails) {
+    public ContactResponseDTO updateContact(Integer id, ContactRequestDTO contactRequest) {
         Contact contact = contactRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Contato não encontrado com id: " + id));
 
-        updateContactFields(contact, contactDetails);
-        setAndValidateOwner(contactDetails);
-        contact.setOwnerUser(contactDetails.getOwnerUser());
+        // Atualiza campos básicos
+        if (contactRequest.getName() != null) {
+            String[] parts = contactRequest.getName().split(" ", 2);
+            contact.setFirstName(parts[0]);
+            contact.setLastName(parts.length > 1 ? parts[1] : "");
+        }
+        contact.setEmail(contactRequest.getEmail());
+        contact.setPhoneNumber(contactRequest.getPhone());
 
-        return contactRepository.save(contact);
+        // Atualiza Owner
+        if (contactRequest.getOwnerUserId() != null) {
+            User owner = userRepository.findById(contactRequest.getOwnerUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário proprietário não encontrado com id: " + contactRequest.getOwnerUserId()));
+            contact.setOwnerUser(owner);
+        }
+
+        Contact updatedContact = contactRepository.save(contact);
+        return ContactMapper.toDTO(updatedContact);
     }
 
     @Transactional
@@ -52,29 +80,5 @@ public class ContactService {
             throw new ResourceNotFoundException("Contato não encontrado com id: " + id);
         }
         contactRepository.deleteById(id);
-    }
-
-    private void setAndValidateOwner(Contact contact) {
-        if (contact.getOwnerUser() != null && contact.getOwnerUser().getUserId() != null) {
-            User owner = userRepository.findById(contact.getOwnerUser().getUserId().intValue())
-                    .orElseThrow(() -> new ResourceNotFoundException("Usuário proprietário não encontrado com id: " + contact.getOwnerUser().getUserId()));
-            contact.setOwnerUser(owner);
-        }
-    }
-
-    private void updateContactFields(Contact contact, Contact details) {
-        contact.setFirstName(details.getFirstName());
-        contact.setLastName(details.getLastName());
-        contact.setEmail(details.getEmail());
-        contact.setPhoneNumber(details.getPhoneNumber());
-        contact.setCompanyName(details.getCompanyName());
-        contact.setJobTitle(details.getJobTitle());
-        contact.setAddressStreet(details.getAddressStreet());
-        contact.setAddressCity(details.getAddressCity());
-        contact.setAddressState(details.getAddressState());
-        contact.setAddressZipCode(details.getAddressZipCode());
-        contact.setAddressCountry(details.getAddressCountry());
-        contact.setLeadSource(details.getLeadSource());
-        contact.setNotes(details.getNotes());
     }
 }
