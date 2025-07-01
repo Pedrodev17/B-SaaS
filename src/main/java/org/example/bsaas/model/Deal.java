@@ -1,7 +1,7 @@
 package org.example.bsaas.model;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
+        import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Entity
@@ -44,7 +44,7 @@ public class Deal {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CurrentStageID", referencedColumnName = "StageID")
-    private PipelineStage currentStage; // <--- Consistência no nome da entidade
+    private PipelineStage currentStage;
 
     @Column(name = "CreatedAt", updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createdAt;
@@ -68,7 +68,109 @@ public class Deal {
         this.currentStage = currentStage;
     }
 
-    // Getters e setters omitidos para brevidade — use os que já possui!
+    public Integer getDealId() {
+        return dealId;
+    }
+
+    public void setDealId(Integer dealId) {
+        this.dealId = dealId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public BigDecimal getValue() {
+        return value;
+    }
+
+    public void setValue(BigDecimal value) {
+        this.value = value;
+    }
+
+    public BigDecimal getProbability() {
+        return probability;
+    }
+
+    public void setProbability(BigDecimal probability) {
+        this.probability = probability;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Timestamp getCloseDate() {
+        return closeDate;
+    }
+
+    public void setCloseDate(Timestamp closeDate) {
+        this.closeDate = closeDate;
+    }
+
+    public User getOwnerUser() {
+        return ownerUser;
+    }
+
+    public void setOwnerUser(User ownerUser) {
+        this.ownerUser = ownerUser;
+    }
+
+    public User getAssignedUser() {
+        return assignedUser;
+    }
+
+    public void setAssignedUser(User assignedUser) {
+        this.assignedUser = assignedUser;
+    }
+
+    public PipelineStage getCurrentStage() {
+        return currentStage;
+    }
+
+    public void setCurrentStage(PipelineStage currentStage) {
+        this.currentStage = currentStage;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
     @Override
     public boolean equals(Object o) {

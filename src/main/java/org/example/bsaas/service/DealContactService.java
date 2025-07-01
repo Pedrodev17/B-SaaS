@@ -1,5 +1,7 @@
 package org.example.bsaas.service;
 
+import org.example.bsaas.dto.DealContactRequestDTO;
+import org.example.bsaas.dto.DealContactResponseDTO;
 import org.example.bsaas.exception.ResourceNotFoundException;
 import org.example.bsaas.model.DealContact;
 import org.example.bsaas.model.Deal;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DealContactService {
@@ -25,30 +28,42 @@ public class DealContactService {
     @Autowired
     private ContactRepository contactRepository;
 
-    public List<DealContact> getAllDealContacts() {
-        return dealContactRepository.findAll();
+    public List<DealContactResponseDTO> getAllDealContacts() {
+        return dealContactRepository.findAll().stream()
+                .map(DealContactMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public DealContact getDealContactById(Integer id) {
-        return dealContactRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("DealContact não encontrado para o id: " + id));
-    }
-
-    @Transactional
-    public DealContact createDealContact(DealContact dealContact) {
-        // Validação das entidades relacionadas
-        validateAndSetDealAndContact(dealContact);
-        return dealContactRepository.save(dealContact);
-    }
-
-    @Transactional
-    public DealContact updateDealContact(Integer id, DealContact dealContactDetails) {
+    public DealContactResponseDTO getDealContactById(Integer id) {
         DealContact dealContact = dealContactRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("DealContact não encontrado para o id: " + id));
-        dealContact.setDeal(dealContactDetails.getDeal());
-        dealContact.setContact(dealContactDetails.getContact());
-        validateAndSetDealAndContact(dealContact);
-        return dealContactRepository.save(dealContact);
+        return DealContactMapper.toDTO(dealContact);
+    }
+
+    @Transactional
+    public DealContactResponseDTO createDealContact(DealContactRequestDTO dto) {
+        Deal deal = dealRepository.findById(dto.getDealId())
+                .orElseThrow(() -> new ResourceNotFoundException("Deal não encontrado para o id: " + dto.getDealId()));
+        Contact contact = contactRepository.findById(dto.getContactId())
+                .orElseThrow(() -> new ResourceNotFoundException("Contact não encontrado para o id: " + dto.getContactId()));
+        DealContact entity = DealContactMapper.toEntity(dto, deal, contact);
+        DealContact saved = dealContactRepository.save(entity);
+        return DealContactMapper.toDTO(saved);
+    }
+
+    @Transactional
+    public DealContactResponseDTO updateDealContact(Integer id, DealContactRequestDTO dto) {
+        DealContact dealContact = dealContactRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("DealContact não encontrado para o id: " + id));
+        Deal deal = dealRepository.findById(dto.getDealId())
+                .orElseThrow(() -> new ResourceNotFoundException("Deal não encontrado para o id: " + dto.getDealId()));
+        Contact contact = contactRepository.findById(dto.getContactId())
+                .orElseThrow(() -> new ResourceNotFoundException("Contact não encontrado para o id: " + dto.getContactId()));
+        dealContact.setDeal(deal);
+        dealContact.setContact(contact);
+        // roleInDeal pode ser incluído aqui se for adicionado ao DTO
+        DealContact updated = dealContactRepository.save(dealContact);
+        return DealContactMapper.toDTO(updated);
     }
 
     @Transactional
@@ -57,17 +72,5 @@ public class DealContactService {
             throw new ResourceNotFoundException("DealContact não encontrado para o id: " + id);
         }
         dealContactRepository.deleteById(id);
-    }
-
-    private void validateAndSetDealAndContact(DealContact dealContact) {
-        // Validação de Deal
-        Deal deal = dealRepository.findById(dealContact.getDeal().getDealId())
-                .orElseThrow(() -> new ResourceNotFoundException("Deal não encontrado para o id: " + dealContact.getDeal().getDealId()));
-        dealContact.setDeal(deal);
-
-        // Validação de Contact
-        Contact contact = contactRepository.findById(dealContact.getContact().getContactId())
-                .orElseThrow(() -> new ResourceNotFoundException("Contact não encontrado para o id: " + dealContact.getContact().getContactId()));
-        dealContact.setContact(contact);
     }
 }

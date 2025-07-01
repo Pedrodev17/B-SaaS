@@ -1,5 +1,7 @@
 package org.example.bsaas.service;
 
+import org.example.bsaas.dto.DealRequestDTO;
+import org.example.bsaas.dto.DealResponseDTO;
 import org.example.bsaas.exception.ResourceNotFoundException;
 import org.example.bsaas.model.Deal;
 import org.example.bsaas.model.User;
@@ -9,10 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Serviço responsável pelas operações de negócio relacionadas à entidade Deal.
- */
 @Service
 public class DealService {
 
@@ -24,54 +24,61 @@ public class DealService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Retorna todos os negócios cadastrados.
-     */
-    public List<Deal> getAllDeals() {
-        return dealRepository.findAll();
+    // Retorna lista de DTOs
+    public List<DealResponseDTO> getAllDeals() {
+        return dealRepository.findAll()
+                .stream()
+                .map(DealMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Busca um negócio pelo id.
-     * @throws ResourceNotFoundException se não existir
-     */
-    public Deal getDealById(Integer id) {
-        return dealRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Negócio não encontrado com id: " + id));
-    }
-
-    /**
-     * Cria um novo negócio. Valida campos obrigatórios e o proprietário.
-     */
-    @Transactional
-    public Deal createDeal(Deal deal) {
-        validarCamposObrigatorios(deal);
-        setAndValidateOwner(deal);
-        return dealRepository.save(deal);
-    }
-
-    /**
-     * Atualiza um negócio existente.
-     * @param id id do negócio
-     * @param dealDetails detalhes atualizados
-     * @return negócio atualizado
-     * @throws ResourceNotFoundException se não existir
-     */
-    @Transactional
-    public Deal updateDeal(Integer id, Deal dealDetails) {
+    // Retorna DTO
+    public DealResponseDTO getDealById(Integer id) {
         Deal deal = dealRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Negócio não encontrado com id: " + id));
-        validarCamposObrigatorios(dealDetails);
-        updateDealFields(deal, dealDetails);
-        setAndValidateOwner(dealDetails);
-        deal.setOwnerUser(dealDetails.getOwnerUser());
-        return dealRepository.save(deal);
+        return DealMapper.toDTO(deal);
     }
 
-    /**
-     * Exclui um negócio pelo id.
-     * @throws ResourceNotFoundException se não existir
-     */
+    // Cria a partir do DTO
+    @Transactional
+    public DealResponseDTO createDeal(DealRequestDTO dealRequest) {
+        User owner = userRepository.findById(dealRequest.getOwnerUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário proprietário não encontrado com id: " + dealRequest.getOwnerUserId()));
+        Deal deal = DealMapper.toEntity(dealRequest, owner);
+        validarCamposObrigatorios(deal);
+        Deal savedDeal = dealRepository.save(deal);
+        return DealMapper.toDTO(savedDeal);
+    }
+
+    // Atualiza a partir do DTO
+    @Transactional
+    public DealResponseDTO updateDeal(Integer id, DealRequestDTO dealRequest) {
+        Deal deal = dealRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Negócio não encontrado com id: " + id));
+
+        // Atualiza campos básicos
+        if (dealRequest.getTitle() != null) {
+            deal.setTitle(dealRequest.getTitle());
+        }
+        if (dealRequest.getDescription() != null) {
+            deal.setDescription(dealRequest.getDescription());
+        }
+        if (dealRequest.getAmount() != null) {
+            deal.setValue(dealRequest.getAmount());
+        }
+
+        // Atualiza Owner
+        if (dealRequest.getOwnerUserId() != null) {
+            User owner = userRepository.findById(dealRequest.getOwnerUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário proprietário não encontrado com id: " + dealRequest.getOwnerUserId()));
+            deal.setOwnerUser(owner);
+        }
+
+        validarCamposObrigatorios(deal);
+        Deal updatedDeal = dealRepository.save(deal);
+        return DealMapper.toDTO(updatedDeal);
+    }
+
     @Transactional
     public void deleteDeal(Integer id) {
         if (!dealRepository.existsById(id)) {
@@ -80,47 +87,7 @@ public class DealService {
         dealRepository.deleteById(id);
     }
 
-    /**
-     * Valida e define o usuário proprietário do negócio.
-     * @param deal negócio a ser validado
-     */
-    private void setAndValidateOwner(Deal deal) {
-        if (deal.getOwnerUser() != null && deal.getOwnerUser().getUserId() != null) {
-            User owner = userRepository.findById(deal.getOwnerUser().getUserId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Usuário proprietário não encontrado com id: " + deal.getOwnerUser().getUserId()));
-            deal.setOwnerUser(owner);
-        }
-    }
-
-    /**
-     * Atualiza campos do negócio caso não sejam nulos.
-     * Permite atualização parcial.
-     * @param deal negócio existente
-     * @param details dados atualizados
-     */
-    private void updateDealFields(Deal deal, Deal details) {
-        if (details.getTitle() != null) {
-            deal.setTitle(details.getTitle());
-        }
-        if (details.getDescription() != null) {
-            deal.setDescription(details.getDescription());
-        }
-        if (details.getValue() != null) {
-            deal.setValue(details.getValue());
-        }
-        if (details.getStatus() != null) {
-            deal.setStatus(details.getStatus());
-        }
-        if (details.getCloseDate() != null) {
-            deal.setCloseDate(details.getCloseDate());
-        }
-    }
-
-    /**
-     * Valida campos obrigatórios do negócio.
-     * @param deal negócio a ser validado
-     * @throws IllegalArgumentException se algum campo obrigatório estiver ausente
-     */
+    // Validação igual ao original
     private void validarCamposObrigatorios(Deal deal) {
         if (deal.getTitle() == null || deal.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("Título é obrigatório");
