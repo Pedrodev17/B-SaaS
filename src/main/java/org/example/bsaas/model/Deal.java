@@ -1,7 +1,7 @@
 package org.example.bsaas.model;
 
 import jakarta.persistence.*;
-        import java.math.BigDecimal;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Entity
@@ -46,6 +46,11 @@ public class Deal {
     @JoinColumn(name = "CurrentStageID", referencedColumnName = "StageID")
     private PipelineStage currentStage;
 
+    // ADICIONADO: Relacionamento com o contato principal (caso deseje buscar por contato principal)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PrimaryContactID", referencedColumnName = "ContactID")
+    private Contact primaryContact;
+
     @Column(name = "CreatedAt", updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createdAt;
 
@@ -55,7 +60,7 @@ public class Deal {
     public Deal() {}
 
     public Deal(String title, String description, BigDecimal value, BigDecimal probability, String currency, String status,
-                Timestamp closeDate, User ownerUser, User assignedUser, PipelineStage currentStage) {
+                Timestamp closeDate, User ownerUser, User assignedUser, PipelineStage currentStage, Contact primaryContact) {
         this.title = title;
         this.description = description;
         this.value = value;
@@ -66,6 +71,7 @@ public class Deal {
         this.ownerUser = ownerUser;
         this.assignedUser = assignedUser;
         this.currentStage = currentStage;
+        this.primaryContact = primaryContact;
     }
 
     public Integer getDealId() {
@@ -156,6 +162,14 @@ public class Deal {
         this.currentStage = currentStage;
     }
 
+    public Contact getPrimaryContact() {
+        return primaryContact;
+    }
+
+    public void setPrimaryContact(Contact primaryContact) {
+        this.primaryContact = primaryContact;
+    }
+
     public Timestamp getCreatedAt() {
         return createdAt;
     }
@@ -197,6 +211,7 @@ public class Deal {
                 ", ownerUser=" + (ownerUser != null ? ownerUser.getUserId() : null) +
                 ", assignedUser=" + (assignedUser != null ? assignedUser.getUserId() : null) +
                 ", currentStage=" + (currentStage != null ? currentStage.getStageId() : null) +
+                ", primaryContact=" + (primaryContact != null ? primaryContact.getContactId() : null) +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';

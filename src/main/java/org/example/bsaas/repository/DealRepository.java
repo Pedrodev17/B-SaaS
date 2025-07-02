@@ -11,27 +11,28 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface DealRepository extends JpaRepository<Deal, Integer> {
 
-    List<Deal> findByDealNameContainingIgnoreCase(String dealName);
-    Page<Deal> findByDealNameContainingIgnoreCase(String dealName, Pageable pageable);
+    List<Deal> findByTitleContainingIgnoreCase(String title);
+    Page<Deal> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
     List<Deal> findByAssignedUser(User assignedUser);
     List<Deal> findByAssignedUserUserId(Integer userId);
 
+    // Métodos para buscar pelo contato principal (agora existente em Deal)
     List<Deal> findByPrimaryContact(Contact primaryContact);
     List<Deal> findByPrimaryContactContactId(Integer contactId);
 
     List<Deal> findByCurrentStage(PipelineStage currentStage);
     List<Deal> findByCurrentStageStageId(Integer stageId);
 
-    List<Deal> findByExpectedCloseDateBefore(Date date);
-    List<Deal> findByExpectedCloseDateAfter(Date date);
+    List<Deal> findByCloseDateBefore(Timestamp date);
+    List<Deal> findByCloseDateAfter(Timestamp date);
 
-    List<Deal> findByAmountBetween(BigDecimal minAmount, BigDecimal maxAmount);
+    List<Deal> findByValueBetween(BigDecimal minValue, BigDecimal maxValue);
 
     List<Deal> findByCurrency(String currency);
 
