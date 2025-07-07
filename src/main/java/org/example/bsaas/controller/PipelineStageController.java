@@ -12,7 +12,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/pipelinestages")
+@RequestMapping("/pipeline stages")
 public class PipelineStageController {
 
     @Autowired

@@ -12,7 +12,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/dealcollaborators")
+@RequestMapping("/deal collaborators")
 public class DealCollaboratorController {
 
     @Autowired
