@@ -1,4 +1,4 @@
-# B-SaaS | CRM Básico
+# CRM 
 
 Um sistema de CRM (Customer Relationship Management) básico, desenvolvido como um projeto de aprendizado para solidificar conceitos de desenvolvimento back-end com Java e Spring Boot, e front-end com Angular. O objetivo é criar uma plataforma SaaS (Software as a Service) para gerenciamento de contatos e clientes.
 
