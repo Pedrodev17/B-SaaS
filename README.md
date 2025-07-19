@@ -1,6 +1,6 @@
 # CRM 
 
-Um sistema de CRM (Customer Relationship Management) básico, desenvolvido como um projeto de aprendizado para solidificar conceitos de desenvolvimento back-end com Java e Spring Boot, e front-end com Angular. O objetivo é criar uma plataforma SaaS (Software as a Service) para gerenciamento de contatos e clientes.
+Uma solução de Customer Relationship Management (CRM) desenvolvida no modelo SaaS (Software as a Service), projetada para otimizar e simplificar o gerenciamento de contatos e clientes. A plataforma foi construída sobre uma arquitetura moderna, com um back-end robusto em Java e Spring Boot e um front-end interativo em Angular.
 
 ## 🚀 Sobre o Projeto
 
